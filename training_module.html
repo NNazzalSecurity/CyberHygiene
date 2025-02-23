@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">Home</a></li>
+                    <li class="breadcrumb-item"><a href="/sector-select">Sectors</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Training Module</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div id="module-content" class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h2 id="module-title" class="card-title mb-4">Loading...</h2>
+                    <p id="module-description" class="card-text mb-4">Loading module content...</p>
+                    
+                    <div id="lessons-container">
+                        <!-- Lessons will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get sector from URL parameter or default to 'personal'
+    const urlParams = new URLSearchParams(window.location.search);
+    const sector = urlParams.get('sector') || 'personal';
+    const moduleId = urlParams.get('module_id') || '1';
+
+    // Fetch module content
+    fetch(`/api/get-training-module?sector=${sector}&module_id=${moduleId}`)
+        .then(response => response.json())
+        .then(module => {
+            document.getElementById('module-title').textContent = module.title;
+            document.getElementById('module-description').textContent = module.content;
+            
+            const lessonsContainer = document.getElementById('lessons-container');
+            lessonsContainer.innerHTML = ''; // Clear loading state
+            
+            // Create accordion for lessons
+            const accordion = document.createElement('div');
+            accordion.className = 'accordion mt-4';
+            accordion.id = 'lessonsAccordion';
+            
+            module.lessons.forEach((lesson, index) => {
+                const accordionItem = `
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button ${index === 0 ? '' : 'collapsed'}" 
+                                    type="button" 
+                                    data-bs-toggle="collapse" 
+                                    data-bs-target="#lesson${index}" 
+                                    aria-expanded="${index === 0 ? 'true' : 'false'}" 
+                                    aria-controls="lesson${index}">
+                                ${lesson.title}
+                            </button>
+                        </h2>
+                        <div id="lesson${index}" 
+                             class="accordion-collapse collapse ${index === 0 ? 'show' : ''}" 
+                             data-bs-parent="#lessonsAccordion">
+                            <div class="accordion-body">
+                                ${lesson.content}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                accordion.innerHTML += accordionItem;
+            });
+            
+            lessonsContainer.appendChild(accordion);
+        })
+        .catch(error => {
+            console.error('Error loading module:', error);
+            document.getElementById('module-content').innerHTML = `
+                <div class="alert alert-danger">
+                    Error loading module content. Please try again later.
+                </div>
+            `;
+        });
+});
+</script>
+{% endblock %}

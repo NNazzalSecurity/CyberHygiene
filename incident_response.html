@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="mb-3">Incident Response Training</h2>
+            <p class="lead">Practice handling real-world cybersecurity incidents. Make decisions and learn from immediate feedback.</p>
+            
+            <!-- Score Display -->
+            <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded mb-4">
+                <div>
+                    <i class="fas fa-trophy text-warning"></i>
+                    <span class="ms-2">Score: <span id="userScore">0</span></span>
+                </div>
+                <button class="btn btn-primary" onclick="loadNewScenario()">
+                    <i class="fas fa-sync-alt me-2"></i>New Scenario
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scenario Card -->
+    <div class="card mb-4" id="scenarioCard" style="display: none;">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0" id="scenarioTitle"></h5>
+            <span class="badge" id="severityBadge"></span>
+        </div>
+        <div class="card-body">
+            <p class="card-text" id="scenarioDescription"></p>
+            
+            <!-- Indicators -->
+            <div class="mb-4">
+                <h6 class="mb-3">Key Indicators:</h6>
+                <div id="indicatorsList" class="d-flex flex-wrap gap-2"></div>
+            </div>
+            
+            <!-- Current Step -->
+            <div id="stepContainer">
+                <h5 class="mb-3" id="stepQuestion"></h5>
+                <div id="optionsList" class="d-grid gap-2"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Progress Bar -->
+    <div class="progress mb-4" style="height: 10px;">
+        <div class="progress-bar" id="progressBar" role="progressbar" style="width: 0%"></div>
+    </div>
+</div>
+
+<!-- Feedback Modal -->
+<div class="modal fade" id="feedbackModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="feedbackTitle"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="feedbackContent"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" id="nextButton">Next Step →</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentScenario = null;
+let currentStep = 0;
+let score = 0;
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadNewScenario();
+});
+
+function loadNewScenario() {
+    fetch('/api/get-incident-scenario')  
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                console.error('Error:', data.error);
+                alert('Error loading scenario: ' + data.error);
+                return;
+            }
+            
+            currentScenario = data.scenario;
+            currentStep = 0;
+            
+            // Update UI
+            document.getElementById('scenarioCard').style.display = 'block';
+            document.getElementById('scenarioTitle').textContent = currentScenario.title;
+            document.getElementById('scenarioDescription').textContent = currentScenario.description;
+            
+            // Set severity badge
+            const badge = document.getElementById('severityBadge');
+            badge.textContent = currentScenario.severity;
+            badge.className = 'badge ' + getSeverityClass(currentScenario.severity);
+            
+            // Show indicators
+            const indicatorsList = document.getElementById('indicatorsList');
+            indicatorsList.innerHTML = currentScenario.indicators.map(indicator => 
+                `<span class="badge bg-secondary">${indicator}</span>`
+            ).join('');
+            
+            // Show first step
+            showStep(0);
+            updateProgress();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to load scenario');
+        });
+}
+
+function showStep(stepIndex) {
+    const step = currentScenario.steps[stepIndex];
+    
+    document.getElementById('stepQuestion').textContent = step.question;
+    
+    const optionsList = document.getElementById('optionsList');
+    optionsList.innerHTML = step.options.map((option, index) => `
+        <button class="btn btn-outline-primary text-start" onclick="submitAnswer(${index})">
+            ${option}
+        </button>
+    `).join('');
+}
+
+function submitAnswer(answerIndex) {
+    fetch('/api/check-incident-response', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            scenario_id: currentScenario.id,
+            step_index: currentStep,
+            answer_index: answerIndex
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            console.error('Error:', data.error);
+            alert('Error checking answer: ' + data.error);
+            return;
+        }
+        
+        // Update score
+        score += data.score_change;
+        document.getElementById('userScore').textContent = score;
+        
+        // Show feedback
+        const modal = new bootstrap.Modal(document.getElementById('feedbackModal'));
+        document.getElementById('feedbackTitle').textContent = data.is_correct ? 'Correct!' : 'Incorrect';
+        document.getElementById('feedbackContent').innerHTML = data.explanation;
+        
+        // Configure next button
+        const nextButton = document.getElementById('nextButton');
+        if (currentStep < currentScenario.steps.length - 1) {
+            nextButton.style.display = 'inline-block';
+            nextButton.onclick = () => {
+                modal.hide();
+                currentStep++;
+                showStep(currentStep);
+                updateProgress();
+            };
+        } else {
+            nextButton.style.display = 'inline-block';
+            nextButton.textContent = 'New Scenario →';
+            nextButton.onclick = () => {
+                modal.hide();
+                loadNewScenario();
+            };
+        }
+        
+        modal.show();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to check answer');
+    });
+}
+
+function updateProgress() {
+    const progress = ((currentStep + 1) / currentScenario.steps.length) * 100;
+    document.getElementById('progressBar').style.width = `${progress}%`;
+}
+
+function getSeverityClass(severity) {
+    switch(severity.toLowerCase()) {
+        case 'critical': return 'bg-danger';
+        case 'high': return 'bg-warning text-dark';
+        case 'medium': return 'bg-info text-dark';
+        default: return 'bg-secondary';
+    }
+}
+</script>
+
+<style>
+.card {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.progress {
+    height: 10px;
+    border-radius: 5px;
+}
+
+.progress-bar {
+    background-color: #28a745;
+    transition: width 0.3s ease;
+}
+
+.btn-outline-primary {
+    border-width: 2px;
+}
+
+.btn-outline-primary:hover {
+    background-color: #f8f9fa;
+    color: #0d6efd;
+}
+
+.badge {
+    font-size: 0.9em;
+    padding: 0.5em 1em;
+}
+
+#indicatorsList .badge {
+    margin-right: 0.5em;
+}
+
+#stepQuestion {
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+#feedbackContent {
+    font-size: 1.1em;
+    line-height: 1.6;
+}
+
+.modal-header {
+    border-bottom: 3px solid;
+}
+
+.modal-header.bg-success {
+    border-bottom-color: #28a745;
+}
+
+.modal-header.bg-danger {
+    border-bottom-color: #dc3545;
+}
+</style>
+{% endblock %}

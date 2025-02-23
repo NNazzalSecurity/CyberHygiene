@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome to CyberHygiene Training{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Hero Section -->
+    <div class="row align-items-center mb-5">
+        <div class="col-lg-6">
+            <h1 class="display-4 fw-bold mb-4" style="color: var(--primary-color);">Welcome to CyberHygiene Training</h1>
+            <p class="lead mb-4">Enhance your cybersecurity awareness through our comprehensive, interactive training modules designed for various sectors.</p>
+            {% if not current_user.is_authenticated %}
+            <div class="d-flex gap-3">
+                <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">Get Started</a>
+                <a href="{{ url_for('login') }}" class="btn btn-outline-primary btn-lg">Sign In</a>
+            </div>
+            {% endif %}
+        </div>
+        <div class="col-lg-6">
+            <div class="position-relative">
+                <div class="card bg-gradient shadow-lg" style="border-radius: 20px; overflow: hidden;">
+                    <div class="card-body p-4">
+                        <div class="row g-4">
+                            <div class="col-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="fas fa-shield-alt fa-2x me-3 text-primary"></i>
+                                    <h3 class="h5 mb-0">Security First</h3>
+                                </div>
+                                <p class="small text-muted mb-0">Learn essential cybersecurity practices</p>
+                            </div>
+                            <div class="col-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="fas fa-graduation-cap fa-2x me-3 text-primary"></i>
+                                    <h3 class="h5 mb-0">Expert Training</h3>
+                                </div>
+                                <p class="small text-muted mb-0">Industry-specific modules</p>
+                            </div>
+                            <div class="col-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="fas fa-certificate fa-2x me-3 text-primary"></i>
+                                    <h3 class="h5 mb-0">Certification</h3>
+                                </div>
+                                <p class="small text-muted mb-0">Earn professional certificates</p>
+                            </div>
+                            <div class="col-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="fas fa-chart-line fa-2x me-3 text-primary"></i>
+                                    <h3 class="h5 mb-0">Track Progress</h3>
+                                </div>
+                                <p class="small text-muted mb-0">Monitor your learning journey</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Features -->
+    <div class="row g-4 mb-5">
+        <!-- Phishing Simulation -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="feature-icon bg-primary bg-gradient p-3 rounded-circle me-3">
+                            <i class="fas fa-fish fa-2x text-white"></i>
+                        </div>
+                        <h3 class="h4 mb-0">Phishing Simulation</h3>
+                    </div>
+                    <p class="text-muted mb-4">Test your ability to identify phishing attempts using our real-world email dataset.</p>
+                    <a href="{{ url_for('phishing_simulation') }}" class="btn btn-outline-primary">Start Simulation</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Training Modules -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="feature-icon bg-success bg-gradient p-3 rounded-circle me-3">
+                            <i class="fas fa-graduation-cap fa-2x text-white"></i>
+                        </div>
+                        <h3 class="h4 mb-0">Training Modules</h3>
+                    </div>
+                    <p class="text-muted mb-4">Learn about cybersecurity best practices through our comprehensive training modules.</p>
+                    <a href="{{ url_for('sector_select') }}" class="btn btn-outline-success">View Modules</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Incident Response -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="feature-icon bg-warning bg-gradient p-3 rounded-circle me-3">
+                            <i class="fas fa-exclamation-triangle fa-2x text-white"></i>
+                        </div>
+                        <h3 class="h4 mb-0">Incident Response</h3>
+                    </div>
+                    <p class="text-muted mb-4">Practice handling cybersecurity incidents through interactive scenarios.</p>
+                    <a href="{{ url_for('incident_response') }}" class="btn btn-outline-warning">Start Training</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sector Selection -->
+    <div class="card border-0 shadow-lg mb-5">
+        <div class="card-header bg-gradient">
+            <h2 class="h4 mb-0 text-white"><i class="fas fa-building me-2"></i>Sector-Specific Training</h2>
+        </div>
+        <div class="card-body p-4">
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-3">
+                    <a href="{{ url_for('sector_training', sector='healthcare') }}" class="text-decoration-none">
+                        <div class="card h-100 border-0 shadow-sm sector-card">
+                            <div class="card-body text-center p-4">
+                                <i class="fas fa-hospital-alt fa-3x text-primary mb-3"></i>
+                                <h4 class="h5">Healthcare</h4>
+                                <p class="text-muted small mb-0">HIPAA compliance and medical device security</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <a href="{{ url_for('sector_training', sector='financial') }}" class="text-decoration-none">
+                        <div class="card h-100 border-0 shadow-sm sector-card">
+                            <div class="card-body text-center p-4">
+                                <i class="fas fa-landmark fa-3x text-success mb-3"></i>
+                                <h4 class="h5">Financial</h4>
+                                <p class="text-muted small mb-0">Banking security and financial data protection</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <a href="{{ url_for('sector_training', sector='education') }}" class="text-decoration-none">
+                        <div class="card h-100 border-0 shadow-sm sector-card">
+                            <div class="card-body text-center p-4">
+                                <i class="fas fa-graduation-cap fa-3x text-info mb-3"></i>
+                                <h4 class="h5">Education</h4>
+                                <p class="text-muted small mb-0">Student data privacy and FERPA compliance</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <a href="{{ url_for('sector_training', sector='personal') }}" class="text-decoration-none">
+                        <div class="card h-100 border-0 shadow-sm sector-card">
+                            <div class="card-body text-center p-4">
+                                <i class="fas fa-user-shield fa-3x text-warning mb-3"></i>
+                                <h4 class="h5">Personal</h4>
+                                <p class="text-muted small mb-0">Individual cybersecurity best practices</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.bg-gradient {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+}
+
+.feature-icon {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sector-card {
+    transition: all 0.3s ease;
+}
+
+.sector-card:hover {
+    transform: translateY(-5px);
+}
+
+.display-4 {
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1.2;
+}
+
+.lead {
+    font-size: 1.25rem;
+    font-weight: 400;
+    color: var(--text-color);
+}
+</style>
+{% endblock %}

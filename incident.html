@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Incident Response - CyberAware{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Incident Response Training</h2>
+    <div class="game-container mt-4">
+        <div class="scenario-description mb-4">
+            <h4 id="scenario-title"></h4>
+            <p id="scenario-text"></p>
+        </div>
+        <div class="action-buttons mb-4" id="action-buttons">
+            <!-- Action buttons will be dynamically inserted here -->
+        </div>
+        <div class="feedback-panel mt-4 d-none">
+            <div class="alert" role="alert" id="response-feedback"></div>
+        </div>
+    </div>
+    <div class="score-display">
+        Score: <span id="current-score">0</span>
+    </div>
+</div>
+{% endblock %}

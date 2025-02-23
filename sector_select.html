@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Select Your Sector - CyberHygiene{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="text-center mb-5">
+        <h2 class="display-5 mb-3">
+            <i class="fas fa-shield-alt text-primary me-2"></i>
+            Tailored Security Training
+        </h2>
+        <p class="lead text-muted">Select your sector for customized cybersecurity training</p>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+        <!-- Healthcare Sector -->
+        <div class="col">
+            <a href="{{ url_for('sector_training', sector='healthcare') }}" class="text-decoration-none">
+                <div class="card h-100 sector-card">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="sector-icon bg-soft-primary">
+                                <i class="fas fa-hospital text-primary"></i>
+                            </div>
+                            <h3 class="card-title h4 mb-0 ms-3">Healthcare Sector</h3>
+                        </div>
+                        <p class="card-text text-muted">Specialized training for healthcare professionals focusing on patient data protection, HIPAA compliance, and medical system security.</p>
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>HIPAA compliance focus</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Patient data protection</li>
+                            <li><i class="fas fa-check-circle text-success me-2"></i>Medical device security</li>
+                        </ul>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Financial Sector -->
+        <div class="col">
+            <a href="{{ url_for('sector_training', sector='financial') }}" class="text-decoration-none">
+                <div class="card h-100 sector-card">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="sector-icon bg-soft-success">
+                                <i class="fas fa-landmark text-success"></i>
+                            </div>
+                            <h3 class="card-title h4 mb-0 ms-3">Financial Sector</h3>
+                        </div>
+                        <p class="card-text text-muted">Advanced security training for financial institutions focusing on transaction security, regulatory compliance, and fraud prevention.</p>
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Banking security protocols</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Financial fraud prevention</li>
+                            <li><i class="fas fa-check-circle text-success me-2"></i>Regulatory compliance</li>
+                        </ul>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Educational Sector -->
+        <div class="col">
+            <a href="{{ url_for('sector_training', sector='education') }}" class="text-decoration-none">
+                <div class="card h-100 sector-card">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="sector-icon bg-soft-warning">
+                                <i class="fas fa-graduation-cap text-warning"></i>
+                            </div>
+                            <h3 class="card-title h4 mb-0 ms-3">Educational Sector</h3>
+                        </div>
+                        <p class="card-text text-muted">Tailored security training for educational institutions focusing on student data protection, research security, and academic integrity.</p>
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Student data protection</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Research data security</li>
+                            <li><i class="fas fa-check-circle text-success me-2"></i>FERPA compliance</li>
+                        </ul>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Personal Users -->
+        <div class="col">
+            <a href="{{ url_for('sector_training', sector='personal') }}" class="text-decoration-none">
+                <div class="card h-100 sector-card">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="sector-icon bg-soft-info">
+                                <i class="fas fa-user-shield text-info"></i>
+                            </div>
+                            <h3 class="card-title h4 mb-0 ms-3">Personal Users</h3>
+                        </div>
+                        <p class="card-text text-muted">Essential cybersecurity training for individuals focusing on personal data protection, online privacy, and digital safety.</p>
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Personal privacy</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Online safety</li>
+                            <li><i class="fas fa-check-circle text-success me-2"></i>Digital security basics</li>
+                        </ul>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+.sector-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: none;
+    background: white;
+}
+
+.sector-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.sector-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sector-icon i {
+    font-size: 24px;
+}
+
+.bg-soft-primary {
+    background-color: rgba(52, 152, 219, 0.1);
+}
+
+.bg-soft-success {
+    background-color: rgba(39, 174, 96, 0.1);
+}
+
+.bg-soft-warning {
+    background-color: rgba(241, 196, 15, 0.1);
+}
+
+.bg-soft-info {
+    background-color: rgba(52, 152, 219, 0.1);
+}
+
+.card-text {
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex align-items-center mb-3">
+                <i class="fas {{ sector_icon }} {{ sector_class }} fa-2x me-3"></i>
+                <h2 class="mb-0">{{ sector_name }} Sector Training</h2>
+            </div>
+            <p class="lead">{{ sector_description }}</p>
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                {{ context_message }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Module Progress -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Your Progress</h5>
+                    <div class="progress mb-3" style="height: 20px;">
+                        <div class="progress-bar" role="progressbar" id="overallProgress" style="width: 0%">0%</div>
+                    </div>
+                    <div class="d-flex justify-content-between text-muted">
+                        <small>Completed Modules: <span id="completedModules">0</span></small>
+                        <small>Total Score: <span id="totalScore">0</span></small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Training Modules -->
+    <div class="row" id="modulesList">
+        <!-- Modules will be loaded here -->
+    </div>
+</div>
+
+<!-- Module Content Modal -->
+<div class="modal fade" id="moduleModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="moduleTitle"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="moduleContent"></div>
+                <div id="quizSection" class="mt-4" style="display: none;">
+                    <h5>Knowledge Check</h5>
+                    <div id="quizContent"></div>
+                    <div id="quizFeedback" class="alert mt-3" style="display: none;"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="startQuizBtn">Start Quiz</button>
+                <button type="button" class="btn btn-success" id="nextModuleBtn" style="display: none;">Next Module →</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentModule = null;
+let moduleProgress = {};
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadModules();
+});
+
+function loadModules() {
+    fetch(`/api/get-training-module?sector={{ sector_name.lower() }}`)
+        .then(response => response.json())
+        .then(data => {
+            const modulesList = document.getElementById('modulesList');
+            modulesList.innerHTML = '';
+            
+            data.modules.forEach((module, index) => {
+                const completed = moduleProgress[module.id] || false;
+                const card = createModuleCard(module, index, completed);
+                modulesList.appendChild(card);
+            });
+            
+            updateProgress();
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+function createModuleCard(module, index, completed) {
+    const col = document.createElement('div');
+    col.className = 'col-md-6 mb-4';
+    
+    col.innerHTML = `
+        <div class="card h-100 ${completed ? 'border-success' : ''}">
+            <div class="card-body">
+                <h5 class="card-title">
+                    ${completed ? '<i class="fas fa-check-circle text-success me-2"></i>' : `<span class="badge bg-primary me-2">${index + 1}</span>`}
+                    ${module.title}
+                </h5>
+                <p class="card-text">${module.description}</p>
+                <button class="btn btn-${completed ? 'outline-success' : 'primary'}" 
+                        onclick="openModule(${module.id})">
+                    ${completed ? 'Review Module' : 'Start Module'}
+                </button>
+            </div>
+        </div>
+    `;
+    
+    return col;
+}
+
+function openModule(moduleId) {
+    fetch(`/api/get-training-module/${moduleId}`)
+        .then(response => response.json())
+        .then(data => {
+            currentModule = data;
+            
+            const modal = new bootstrap.Modal(document.getElementById('moduleModal'));
+            document.getElementById('moduleTitle').textContent = data.title;
+            document.getElementById('moduleContent').innerHTML = data.content;
+            document.getElementById('quizSection').style.display = 'none';
+            document.getElementById('startQuizBtn').style.display = 'block';
+            document.getElementById('nextModuleBtn').style.display = 'none';
+            
+            modal.show();
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+function startQuiz() {
+    if (!currentModule || !currentModule.quiz) return;
+    
+    const quizSection = document.getElementById('quizSection');
+    const quizContent = document.getElementById('quizContent');
+    const startQuizBtn = document.getElementById('startQuizBtn');
+    
+    quizSection.style.display = 'block';
+    startQuizBtn.style.display = 'none';
+    
+    // Display quiz questions
+    quizContent.innerHTML = currentModule.quiz.questions.map((question, index) => `
+        <div class="mb-4">
+            <p class="fw-bold">${index + 1}. ${question.text}</p>
+            <div class="d-grid gap-2">
+                ${question.options.map((option, optIndex) => `
+                    <button class="btn btn-outline-primary text-start" 
+                            onclick="submitAnswer(${index}, ${optIndex})">
+                        ${option}
+                    </button>
+                `).join('')}
+            </div>
+        </div>
+    `).join('');
+}
+
+function submitAnswer(questionIndex, answerIndex) {
+    if (!currentModule || !currentModule.quiz) return;
+    
+    const question = currentModule.quiz.questions[questionIndex];
+    const isCorrect = answerIndex === question.correct;
+    
+    const feedback = document.getElementById('quizFeedback');
+    feedback.className = `alert alert-${isCorrect ? 'success' : 'danger'}`;
+    feedback.innerHTML = `
+        <i class="fas fa-${isCorrect ? 'check' : 'times'}-circle me-2"></i>
+        ${isCorrect ? 'Correct!' : 'Incorrect.'} ${question.explanation}
+    `;
+    feedback.style.display = 'block';
+    
+    if (isCorrect) {
+        // Mark buttons as correct/incorrect
+        const buttons = document.querySelectorAll(`#quizContent > div:nth-child(${questionIndex + 1}) button`);
+        buttons.forEach((btn, idx) => {
+            btn.disabled = true;
+            if (idx === answerIndex) {
+                btn.classList.replace('btn-outline-primary', 'btn-success');
+            }
+        });
+        
+        // Show next module button if all questions answered correctly
+        const allAnswered = true; // You'll need to track this properly
+        if (allAnswered) {
+            document.getElementById('nextModuleBtn').style.display = 'block';
+            moduleProgress[currentModule.id] = true;
+            updateProgress();
+        }
+    }
+}
+
+function updateProgress() {
+    const completed = Object.values(moduleProgress).filter(v => v).length;
+    const total = document.querySelectorAll('#modulesList > div').length;
+    const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+    
+    document.getElementById('overallProgress').style.width = `${percentage}%`;
+    document.getElementById('overallProgress').textContent = `${percentage}%`;
+    document.getElementById('completedModules').textContent = `${completed}/${total}`;
+}
+
+document.getElementById('startQuizBtn').addEventListener('click', startQuiz);
+document.getElementById('nextModuleBtn').addEventListener('click', function() {
+    const modal = bootstrap.Modal.getInstance(document.getElementById('moduleModal'));
+    modal.hide();
+    loadModules(); // Refresh the module list
+});
+</script>
+
+<style>
+.card {
+    transition: all 0.3s ease;
+}
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+.progress {
+    border-radius: 1rem;
+    background-color: #f0f0f0;
+}
+.progress-bar {
+    background-color: var(--bs-success);
+    transition: width 0.5s ease;
+}
+.modal-dialog {
+    max-width: 800px;
+}
+.btn-outline-primary:hover {
+    background-color: var(--bs-primary);
+    color: white;
+}
+.quiz-feedback {
+    transition: all 0.3s ease;
+}
+</style>
+{% endblock %}

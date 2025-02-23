@@ -1,0 +1,35 @@
+{% extends "index.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Cybersecurity Training Modules</h2>
+    <div class="row mt-4">
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Password Security</h5>
+                    <p class="card-text">Learn best practices for creating and managing secure passwords.</p>
+                    <button class="btn btn-primary start-module" data-module="password">Start Module</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Social Engineering</h5>
+                    <p class="card-text">Understand and identify common social engineering tactics.</p>
+                    <button class="btn btn-primary start-module" data-module="social">Start Module</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Data Protection</h5>
+                    <p class="card-text">Learn how to protect sensitive data in your workplace.</p>
+                    <button class="btn btn-primary start-module" data-module="data">Start Module</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

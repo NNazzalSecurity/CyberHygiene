@@ -1,0 +1,397 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">Home</a></li>
+                    <li class="breadcrumb-item"><a href="/sectors">Sectors</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Phishing Simulation</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="card-title mb-0">Phishing Simulation</h2>
+                            <p class="text-muted mb-0">Learn to identify and avoid phishing attempts</p>
+                        </div>
+                        <div class="d-flex align-items-center gap-3">
+                            <button class="btn btn-info" onclick="showHelp()">
+                                <i class="fas fa-question-circle me-2"></i>
+                                How to Identify Phishing
+                            </button>
+                            <button class="btn btn-warning" onclick="showTips()">
+                                <i class="fas fa-lightbulb me-2"></i>
+                                Show Tips
+                            </button>
+                            <div class="score-display p-3 rounded bg-primary text-white">
+                                <i class="fas fa-trophy me-2"></i>
+                                Score: <span id="score">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <!-- Email Simulation -->
+                    <div id="email-container">
+                        <div class="email-header border-bottom pb-3 mb-3">
+                            <div class="row mb-2">
+                                <div class="col-md-2">
+                                    <strong>From:</strong>
+                                </div>
+                                <div class="col-md-10">
+                                    <span id="email-from" class="analyzable"></span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <strong>Subject:</strong>
+                                </div>
+                                <div class="col-md-10">
+                                    <span id="email-subject" class="analyzable"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="email-body mb-4">
+                            <p id="email-content" class="analyzable mb-0"></p>
+                        </div>
+                    </div>
+
+                    <!-- Analysis Tools -->
+                    <div class="analysis-tools mb-4">
+                        <h5 class="mb-3">Analysis Tools</h5>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <button class="btn btn-outline-primary w-100" onclick="analyzeEmail('sender')">
+                                    <i class="fas fa-user-circle me-2"></i>
+                                    Analyze Sender
+                                </button>
+                            </div>
+                            <div class="col-md-4">
+                                <button class="btn btn-outline-primary w-100" onclick="analyzeEmail('links')">
+                                    <i class="fas fa-link me-2"></i>
+                                    Check Links
+                                </button>
+                            </div>
+                            <div class="col-md-4">
+                                <button class="btn btn-outline-primary w-100" onclick="analyzeEmail('attachments')">
+                                    <i class="fas fa-paperclip me-2"></i>
+                                    Scan Attachments
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Decision Buttons -->
+                    <div class="decision-buttons text-center">
+                        <button class="btn btn-danger btn-lg me-3" onclick="makeDecision(true)">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Mark as Phishing
+                        </button>
+                        <button class="btn btn-success btn-lg" onclick="makeDecision(false)">
+                            <i class="fas fa-check-circle me-2"></i>
+                            Mark as Safe
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Feedback Modal -->
+<div class="modal fade" id="feedbackModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="feedbackTitle"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="feedbackContent"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" id="nextButton">Next Scenario →</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Help Modal -->
+<div class="modal fade" id="helpModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">How to Identify Phishing</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="help-content">
+                    <h6>1. Check the Sender</h6>
+                    <p>Look for suspicious email addresses that try to mimic legitimate companies.</p>
+                    
+                    <h6>2. Analyze the Subject</h6>
+                    <p>Be wary of urgent or threatening language designed to make you act quickly.</p>
+                    
+                    <h6>3. Examine Links</h6>
+                    <p>Hover over links to preview their true destination before clicking.</p>
+                    
+                    <h6>4. Look for Mistakes</h6>
+                    <p>Poor grammar, spelling errors, or inconsistent branding may indicate phishing.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Got it!</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tips Modal -->
+<div class="modal fade" id="tipsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Tips for This Sector</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="sectorTips"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentScenario = null;
+let score = 0;
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Page loaded, initializing...');
+    loadNewScenario();
+});
+
+function loadNewScenario() {
+    console.log('Loading new scenario...');
+    
+    // Enable decision buttons
+    document.querySelector('button[onclick="makeDecision(true)"]').disabled = false;
+    document.querySelector('button[onclick="makeDecision(false)"]').disabled = false;
+    
+    fetch('/api/get-scenario')
+        .then(response => response.json())
+        .then(data => {
+            console.log('Got scenario data:', data);
+            if (data.error) {
+                console.error('Error in scenario:', data.error);
+                alert('Error loading scenario: ' + data.error);
+                return;
+            }
+            
+            currentScenario = data;
+            document.getElementById('email-from').textContent = data.from || '';
+            document.getElementById('email-subject').textContent = data.subject || '';
+            document.getElementById('email-content').textContent = data.content || '';
+            
+            // Reset any previous analysis highlights
+            document.querySelectorAll('.analyzable').forEach(el => {
+                el.classList.remove('warning-highlight', 'safe-highlight');
+            });
+        })
+        .catch(error => {
+            console.error('Error loading scenario:', error);
+            alert('Failed to load scenario: ' + error);
+        });
+}
+
+function makeDecision(isPhishing) {
+    if (!currentScenario) {
+        console.error('No current scenario available');
+        return;
+    }
+    
+    // Disable decision buttons
+    document.querySelector('button[onclick="makeDecision(true)"]').disabled = true;
+    document.querySelector('button[onclick="makeDecision(false)"]').disabled = true;
+    
+    fetch('/api/check-answer', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            is_phishing: isPhishing,
+            actual_answer: currentScenario.is_phishing
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Got decision response:', data);
+        
+        // Update score
+        score += data.score;
+        document.getElementById('score').textContent = score;
+        
+        // Show feedback modal
+        const modal = new bootstrap.Modal(document.getElementById('feedbackModal'));
+        document.getElementById('feedbackTitle').textContent = data.is_correct ? 'Correct!' : 'Incorrect';
+        document.getElementById('feedbackContent').innerHTML = `${data.message}<br><br>${data.explanation}`;
+        
+        // Set up next button
+        const nextButton = document.getElementById('nextButton');
+        nextButton.style.display = 'inline-block';
+        nextButton.onclick = function() {
+            modal.hide();
+            setTimeout(loadNewScenario, 500);
+        };
+        
+        modal.show();
+    })
+    .catch(error => {
+        console.error('Error checking answer:', error);
+        alert('Failed to check answer: ' + error);
+    });
+}
+
+function analyzeEmail(aspect) {
+    if (!currentScenario || !currentScenario.analysis) {
+        console.error('No scenario or analysis data available');
+        return;
+    }
+    
+    let analysis = currentScenario.analysis;
+    let result = '';
+    let isWarning = false;
+    
+    switch(aspect) {
+        case 'sender':
+            result = analysis.sender;
+            isWarning = analysis.sender_suspicious;
+            highlightElement('email-from', isWarning);
+            break;
+        case 'links':
+            result = analysis.urls;
+            isWarning = analysis.urls_suspicious;
+            highlightLinks(isWarning);
+            break;
+        case 'attachments':
+            result = 'No attachments present.';
+            isWarning = false;
+            break;
+    }
+    
+    // Show analysis result
+    const modal = new bootstrap.Modal(document.getElementById('feedbackModal'));
+    document.getElementById('feedbackTitle').textContent = 'Analysis Result';
+    document.getElementById('feedbackContent').innerHTML = result;
+    document.getElementById('nextButton').style.display = 'none';
+    modal.show();
+}
+
+function highlightElement(elementId, isWarning) {
+    const element = document.getElementById(elementId);
+    if (!element) return;
+    element.classList.remove('warning-highlight', 'safe-highlight');
+    element.classList.add(isWarning ? 'warning-highlight' : 'safe-highlight');
+}
+
+function highlightLinks(isWarning) {
+    const content = document.getElementById('email-content');
+    if (!content) return;
+    content.classList.remove('warning-highlight', 'safe-highlight');
+    content.classList.add(isWarning ? 'warning-highlight' : 'safe-highlight');
+}
+
+function showHelp() {
+    new bootstrap.Modal(document.getElementById('helpModal')).show();
+}
+
+function showTips() {
+    new bootstrap.Modal(document.getElementById('tipsModal')).show();
+}
+</script>
+
+<style>
+.analyzable {
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.warning-highlight {
+    background-color: #ffebee;
+    border: 1px solid #ffcdd2;
+    padding: 4px;
+    border-radius: 4px;
+}
+
+.safe-highlight {
+    background-color: #e8f5e9;
+    border: 1px solid #c8e6c9;
+    padding: 4px;
+    border-radius: 4px;
+}
+
+.score-display {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.email-header strong {
+    color: #6c757d;
+}
+
+.btn {
+    transition: all 0.3s ease;
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+#nextButton {
+    min-width: 120px;
+    background-color: #28a745;
+    border-color: #28a745;
+    color: white;
+    font-weight: bold;
+}
+
+#nextButton:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem;
+}
+
+#feedbackContent {
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    line-height: 1.5;
+}
+</style>
+
+{% endblock %}
